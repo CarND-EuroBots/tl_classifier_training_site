@@ -16,9 +16,18 @@ The network is using TensorFlow and retrain program taken from Tensorflow exampl
 
 ## Dataset
 
-The dataset of train images was harvested from rosbags of data recorded in the Udacity circuit and included as part of project resources.  A total of 1840 images were collected and tagged using [tag.py](tag.py) script:
+The dataset of train images was harvested from:
+
+* Rosbags of data recorded in the Udacity test site and included as part of project resources [bag1](), [bag2](), [bag3](https://drive.google.com/open?id=0B2_h37bMVw3iT0ZEdlF4N01QbHc). The files were tagged with aid of [tag.py](tag.py) script:
 
 `python tag.py --src sourch_path --dest dest_path`
+
+* [Bosch traffic lights dataset](https://hci.iwr.uni-heidelberg.de/node/6132).  Files from train & test sets were filtered by [parse_bosch.py](parse_bosch.py).
+
+`python parse_bosch.py -s dataset_test_rgb -d bosch_dataset_test -y test.yaml`
+
+The tagged udcity images and filtered Bosch images can be found at:
+[Google drive](https://drive.google.com/open?id=0B4qw0IM65hVpQTdwSkxpOTRVLWM)
 
 ## Training
 
