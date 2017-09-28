@@ -21,6 +21,7 @@ import argparse
 
 import numpy as np
 import tensorflow as tf
+import os
 
 def load_graph(model_file):
   graph = tf.Graph()
@@ -67,6 +68,7 @@ def load_labels(label_file):
 
 if __name__ == "__main__":
   file_name = "tensorflow/examples/label_image/data/grace_hopper.jpg"
+  images_dir = None
   model_file = \
     "tensorflow/examples/label_image/data/inception_v3_2016_08_28_frozen.pb"
   label_file = "tensorflow/examples/label_image/data/imagenet_slim_labels.txt"
@@ -79,6 +81,7 @@ if __name__ == "__main__":
 
   parser = argparse.ArgumentParser()
   parser.add_argument("--image", help="image to be processed")
+  parser.add_argument("--images_dir", help="images dir to be processed")
   parser.add_argument("--graph", help="graph/model to be executed")
   parser.add_argument("--labels", help="name of file containing labels")
   parser.add_argument("--input_height", type=int, help="input height")
@@ -93,6 +96,8 @@ if __name__ == "__main__":
     model_file = args.graph
   if args.image:
     file_name = args.image
+  if args.images_dir:
+    images_dir = args.images_dir
   if args.labels:
     label_file = args.labels
   if args.input_height:
@@ -109,23 +114,66 @@ if __name__ == "__main__":
     output_layer = args.output_layer
 
   graph = load_graph(model_file)
-  t = read_tensor_from_image_file(file_name,
-                                  input_height=input_height,
-                                  input_width=input_width,
-                                  input_mean=input_mean,
-                                  input_std=input_std)
 
-  input_name = "import/" + input_layer
-  output_name = "import/" + output_layer
-  input_operation = graph.get_operation_by_name(input_name);
-  output_operation = graph.get_operation_by_name(output_name);
-
-  with tf.Session(graph=graph) as sess:
-    results = sess.run(output_operation.outputs[0],
-                      {input_operation.outputs[0]: t})
-  results = np.squeeze(results)
-
-  # top_k = results.argsort()[-5:][::-1]
+  images_count = 0
+  correct_count = 0
   labels = load_labels(label_file)
-  for i in range(len(results)):
-    print(labels[i], results[i])
+  if images_dir is not None:
+    classes = os.listdir(images_dir)
+    for tl_class in classes:
+      if not tl_class.startswith("."):
+        class_index = labels.index(tl_class)
+        class_dir = os.path.join(images_dir, tl_class)
+        files = os.listdir(class_dir)
+
+        for image_name in files:
+          if not image_name.startswith("."):
+            file_name = os.path.join(class_dir, image_name)
+            t = read_tensor_from_image_file(file_name,
+                                            input_height=input_height,
+                                            input_width=input_width,
+                                            input_mean=input_mean,
+                                            input_std=input_std)
+
+            input_name = "import/" + input_layer
+            output_name = "import/" + output_layer
+            input_operation = graph.get_operation_by_name(input_name);
+            output_operation = graph.get_operation_by_name(output_name);
+
+            with tf.Session(graph=graph) as sess:
+              results = sess.run(output_operation.outputs[0],
+                                 {input_operation.outputs[0]: t})
+            results = np.squeeze(results)
+
+            top_k = results.argsort()[:][::-1]
+            best_class = top_k[0]
+            if best_class == class_index:
+              correct_count += 1
+            images_count += 1
+            if images_count % 10 == 0:
+              print("processed {} images. correct {}. so far accuracy: {}".format(images_count, correct_count, correct_count * 1.0 / images_count))
+
+
+    print("FINAL RESULT: total images:{} correct classification:{} accuracy: {}".format(images_count, correct_count, correct_count * 1.0 / images_count))
+
+
+  else:
+    t = read_tensor_from_image_file(file_name,
+                                    input_height=input_height,
+                                    input_width=input_width,
+                                    input_mean=input_mean,
+                                    input_std=input_std)
+
+    input_name = "import/" + input_layer
+    output_name = "import/" + output_layer
+    input_operation = graph.get_operation_by_name(input_name);
+    output_operation = graph.get_operation_by_name(output_name);
+
+    with tf.Session(graph=graph) as sess:
+      results = sess.run(output_operation.outputs[0],
+                        {input_operation.outputs[0]: t})
+    results = np.squeeze(results)
+
+    # top_k = results.argsort()[-5:][::-1]
+    for i in range(len(results)):
+      print(labels[i], results[i])
