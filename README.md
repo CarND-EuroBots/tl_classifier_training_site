@@ -18,7 +18,7 @@ The network is using TensorFlow and retrain program taken from Tensorflow exampl
 
 The dataset of train images was harvested from:
 
-* Rosbags of data recorded in the Udacity test site and included as part of project resources [bag1](), [bag2](), [bag3](https://drive.google.com/open?id=0B2_h37bMVw3iT0ZEdlF4N01QbHc). The files were tagged with aid of [tag.py](tag.py) script:
+* Rosbags of data recorded in the Udacity test site and included as part of project resources [bag1](https://drive.google.com/file/d/0B2_h37bMVw3iYkdJTlRSUlJIamM/view?usp=sharing), [bag2](), [bag3](https://drive.google.com/open?id=0B2_h37bMVw3iT0ZEdlF4N01QbHc). The files were tagged with aid of [tag.py](tag.py) script:
 
 `python tag.py --src sourch_path --dest dest_path`
 
